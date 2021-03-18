@@ -150,11 +150,15 @@ async def show_links(message: types.Message):
 @dp.message_handler(commands=['get_info'])
 @dp.message_handler(Text(equals="инфо по делу", ignore_case=True))
 async def get_info(message):
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    cancel_but = types.KeyboardButton(text='Отмена')
-    keyboard.add(cancel_but)
-    await SelectMenu.waiting_get_info.set()
-    await message.answer('Укажи ссылку на дело:', reply_markup=keyboard)
+    try:
+        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        cancel_but = types.KeyboardButton(text='Отмена')
+        keyboard.add(cancel_but)
+        await SelectMenu.waiting_get_info.set()
+        await message.answer('Укажи ссылку на дело:', reply_markup=keyboard)
+    except Exception:
+        await message.answer('Произошла внутренняя ошибка. Повтори запрос.\n'
+                             'Если ошибка повторяется, обратись к админу')
 
 
 @dp.message_handler(state=SelectMenu.waiting_get_info)
@@ -194,24 +198,27 @@ async def request_info(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=['get_info_all'])
 @dp.message_handler(Text(equals="инфо по делам", ignore_case=True))
 async def get_info(message: types.Message):
-    if database.count_rows_sql(con) != 0:
-        from_post = str()
-        await message.answer('Жди, ищу информацию. Будет %s дел:' % database.count_rows_sql(con))
-        for row in database.show_all_link(con):
-            post = utils.data_parser(row[0])
-            if utils.where_url_save(row[0]) == 'blue_site':
-                from_post = post[0][2][45:] + "\n\nДвижение по делу: \n- " + post[1][-2] + "\n" + "- " + post[1][-1]
-                database.update_info_in_base(con, row[0], post)
-            elif utils.where_url_save(row[0]) == 'brown_site':
-                names = post[0][2:]
-                from_post = (', '.join(map(str, names))) + "\n\nДвижение по делу: \n- " + post[1][-2] + "\n" + "- " + \
-                            post[1][-1]
-                database.update_info_in_base(con, row[0], post)
-            await message.answer('\nИнформация по делу:\n' + from_post +
-                                 '\n _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _')
-    else:
-        await message.answer('Нет отслеживаемых дел')
-
+    try:
+        if database.count_rows_sql(con) != 0:
+            from_post = str()
+            await message.answer('Жди, ищу информацию. Будет %s дел:' % database.count_rows_sql(con))
+            for row in database.show_all_link(con):
+                post = utils.data_parser(row[0])
+                if utils.where_url_save(row[0]) == 'blue_site':
+                    from_post = post[0][2][45:] + "\n\nДвижение по делу: \n- " + post[1][-2] + "\n" + "- " + post[1][-1]
+                    database.update_info_in_base(con, row[0], post)
+                elif utils.where_url_save(row[0]) == 'brown_site':
+                    names = post[0][2:]
+                    from_post = (', '.join(map(str, names))) + "\n\nДвижение по делу: \n- " + post[1][-2] + "\n" + "- " + \
+                                post[1][-1]
+                    database.update_info_in_base(con, row[0], post)
+                await message.answer('\nИнформация по делу:\n' + from_post +
+                                     '\n _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _')
+        else:
+            await message.answer('Нет отслеживаемых дел')
+    except Exception:
+        await message.answer('Произошла внутренняя ошибка. Повтори запрос.\n'
+                             'Если ошибка повторяется, обратись к админу')
 
 # Delete selected link from DB
 @dp.message_handler(commands=['delete_link'])
