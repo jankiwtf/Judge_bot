@@ -1,2 +1,4 @@
 # Project exclude paths
 /venv/
+botdatabase.db
+url_list.txt

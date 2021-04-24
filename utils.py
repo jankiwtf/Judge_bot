@@ -3,6 +3,9 @@ import url_library
 import time
 from selenium import webdriver
 
+import pathlib
+from pathlib import Path
+
 
 # Search link in DB
 def where_url_save(url):
@@ -17,30 +20,39 @@ def where_url_save(url):
 
 
 def data_parser(url):
-    logging.info("Browser in run!")
+    logging.info("Parsing started")
 
-    # подключение браузера и прописывание адреса к драйверу
-    driver = webdriver.Chrome('/Users/janki/Desktop/Python/judge_bot/venv/lib/python3.9/site-packages/selenium/'
-                              'webdriver/chrome/chromedriver')
+    # Run in server
+    # chrome_options = Options()
+    # chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--no-sandbox')
+    # chrome_options.add_argument('--disable-dev-shm-usage')
+
+    # Connect to WebDriver
+    dir_path = pathlib.Path.cwd()
+    path = Path(dir_path, 'venv/lib/python3.9/site-packages/selenium/webdriver/chrome/chromedriver')
+
+    driver = webdriver.Chrome(executable_path=path)  # Run in local
+    # driver = webdriver.Chrome(executable_path=path, chrome_options=chrome_options) # Run in server
     driver.get(url)
 
-    # ждем пока загрузится страница
-    driver.implicitly_wait(15)
+    # Waiting for page downloading
+    driver.implicitly_wait(20)
 
-    bio_list = []
+    party_list = []
     info_list = []
 
     # Search in blue_site
     if where_url_save(url) == 'blue_site':
 
-        # Find players data
+        # Find party
         driver.find_element_by_xpath('//*[@id="tabs"]/li[3]/span').click()  # Click button
-        search_bio = driver.find_elements_by_class_name('tab-content')
-        for row in search_bio:
+        search_party = driver.find_elements_by_class_name('tab-content')
+        for row in search_party:
             if row.text != '':
-                bio_list.append(row.text)
+                party_list.append(row.text)
 
-        # Find main data
+        # Find info
         driver.find_element_by_xpath('//*[@id="tabs"]/li[2]/span').click()
         search_info = driver.find_elements_by_class_name('tab-content')
         for row in search_info:
@@ -50,20 +62,21 @@ def data_parser(url):
     # Search in brown_site
     elif where_url_save(url) == 'brown_site':
 
-        # Find players data
+        # Find party
         driver.find_element_by_xpath('//*[@id="tab3"]').click()
-        bio_list.append(driver.find_element_by_id('cont3').text)
+        party_list.append(driver.find_element_by_id('cont3').text)
 
-        # Find main data
+        # Find info
         driver.find_element_by_xpath('//*[@id="tab2"]').click()
-        info_list.append(driver.find_element_by_id('cont2').text)
+        info_list.append(driver.find_element_by_id("cont2").text)
 
-    bio = bio_list[0].split(sep='\n')
+    # print(info_list[0])
+    bio = party_list[0].split(sep='\n')
     info = info_list[0].split(sep='\n')
-    responce = [bio, info]
 
+    responce = [bio, info]
     driver.close()
     time.sleep(1)
     driver.quit()
-    logging.info("Browser closed!")
+    logging.info("Parsing completed!")
     return responce
