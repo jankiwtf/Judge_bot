@@ -1,20 +1,11 @@
 import logging
-import sqlite3
-from sqlite3 import Error
 from datetime import datetime
-
-
-def sql_connection():
-    try:
-        con = sqlite3.connect('botdatabase.db')
-        return con
-    except Error:
-        logging.error(Error)
+from url_db import sql_connection
 
 
 # New user
-def sql_new_user(con, user_id):
-    con = sqlite3.connect('botdatabase.db')
+def sql_new_user(user_id):
+    con = sql_connection()
     cur = con.cursor()
     now_date = datetime.now()
     data = ('None', user_id, now_date, False)
@@ -25,9 +16,21 @@ def sql_new_user(con, user_id):
     con.close()
 
 
+# add username
+def sql_update_name(username, user_id):
+    con = sql_connection()
+    cur = con.cursor()
+    data = (username, user_id)
+    with con:
+        cur.execute("UPDATE users SET user_name = ? WHERE user_id = ?", data)
+    logging.info(f"User's ({user_id}) name update")
+    con.commit()
+    con.close()
+
+
 # Check user
-def sql_init_user(con, user_id):
-    con = sqlite3.connect('botdatabase.db')
+def sql_init_user(user_id):
+    con = sql_connection()
     cur = con.cursor()
     db_user = cur.execute("SELECT user_id, admin_check FROM users").fetchall()
     con.commit()
@@ -39,8 +42,8 @@ def sql_init_user(con, user_id):
 
 
 # Saved users
-def sql_show_users(con):
-    con = sqlite3.connect('botdatabase.db')
+def sql_show_users():
+    con = sql_connection()
     cur = con.cursor()
     users = cur.execute("SELECT user_id, user_name FROM users").fetchall()
     con.commit()
@@ -49,8 +52,8 @@ def sql_show_users(con):
 
 
 # Delete user
-def sql_delete_user(con, user_id):
-    con = sqlite3.connect('botdatabase.db')
+def sql_delete_user(user_id):
+    con = sql_connection()
     cur = con.cursor()
     cur.execute("DELETE FROM users WHERE user_id ='%s'" % int(user_id))
     logging.info("User %s deleted from DB" % user_id)
@@ -59,8 +62,8 @@ def sql_delete_user(con, user_id):
 
 
 # Count saved users
-def sql_count_users(con):
-    con = sqlite3.connect('botdatabase.db')
+def sql_count_users():
+    con = sql_connection()
     cur = con.cursor()
     count = cur.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     con.commit()
@@ -69,13 +72,13 @@ def sql_count_users(con):
 
 
 # New user's table
-def sql_create_user_table(con):
-    con = sqlite3.connect('botdatabase.db')
+def sql_create_user_table():
+    con = sql_connection()
     cur = con.cursor()
     with con:
-        cur.execute("CREATE TABLE users ("
+        cur.execute("CREATE TABLE IF NOT EXISTS users ("
                     "user_name TEXT, "
-                    "user_id INT PRIMARY KEY, "
+                    "user_id INTEGER PRIMARY KEY, "
                     "date_registration DATETIME, "
                     "admin_check BOOL);")
         data = ('@janki_wtf', 199225478, None, True)
