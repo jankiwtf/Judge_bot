@@ -1,0 +1,5 @@
+/venv/
+.handler-saves
+botdatabase.db
+url_list.txt
+config.ini

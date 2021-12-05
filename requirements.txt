@@ -1,0 +1,9 @@
+beautifulsoup4==4.9.3
+dp==1.0
+aiogram==2.11.2
+pyTelegramBotAPI==3.7.6
+python-telegram-bot==13.8.1
+keyboa==2.2.8
+multiprocess==0.70.12.2
+pathos==0.2.8
+selenium==3.141.0
