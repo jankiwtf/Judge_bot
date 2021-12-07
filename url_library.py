@@ -60,6 +60,9 @@ white_site = [
 #     'https://ms83.mirsud24.ru',
 # ]
 
+green_site = [
+    'http://mirsud.tatar.ru',
+]
 
 # Search link in DB
 def where_url_save(url):
@@ -81,5 +84,7 @@ def where_url_save(url):
         return 'white_site'
     # elif short_link in red_site:
     #     return 'red_site'
+    elif short_link in green_site:
+        return 'green_site'
     else:
         return False

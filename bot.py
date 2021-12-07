@@ -158,7 +158,7 @@ async def get_user(message: types.Message, state: FSMContext):
 
 
 # Адинистратор. Показать всех пользователей
-@dp.message_handler(Text(equals="Показать юзеров", ignore_case=True))
+@dp.message_handler(Text(equals="показать юзеров", ignore_case=True))
 async def show_users(message: types.Message):
     await clean_spam(message, 1)
     await admin.show_users(message)
@@ -237,24 +237,33 @@ async def saved_key(message: types.Message, state: FSMContext):
     elif url_db.sql_check_link(url):
         await message.reply('За этим делом я уже слежу!')
     elif url[:4] == 'http':
-        try:
+        # try:
             import url_library
             if url_library.where_url_save(url) is not False:
                 await message.answer('Ожидай, добавляю дело в базу..')
                 parse_data = utils.data_parser(url)
-                party = parse_data[0]
-                info = parse_data[1]
-                user_id = message.from_user.id
-                url_db.sql_new_key(party, info, url, user_id)
-                await message.answer(
-                    f'Дело:\n'
-                    f'{party}\n'
-                    f'добавлено для отслеживания!'
-                )
+                if url_db.sql_check_link(parse_data['link']):
+                    await message.reply('За этим делом я уже слежу!')
+                    return
+                if parse_data['success']:
+                    # party = parse_data[0]
+                    # info = parse_data[1]
+                    party = parse_data['response'][0]
+                    info = parse_data['response'][1]
+                    url = parse_data['link']
+                    user_id = message.from_user.id
+                    url_db.sql_new_key(party, info, url, user_id)
+                    await message.answer(
+                        f'Дело:\n'
+                        f'{party}\n'
+                        f'добавлено для отслеживания!'
+                    )
+                else:
+                    await message.answer('Не смог прочитать ссылку. \nПроверь правильность введенного адреса')
             else:
                 await message.answer('Ошибка в адресе или я c ним еще не умею работать. \nОбратись к администратору')
-        except Exception:
-            await message.answer('Не смог прочитать ссылку. \nПроверь правильность введенного адреса')
+        # except Exception:
+        #     await message.answer('Не смог прочитать ссылку. \nПроверь правильность введенного адреса')
     else:
         await message.reply('Упс, это была не ссылка..')
     await state.finish()
@@ -323,7 +332,7 @@ async def select_key_link(message: types.Message, state: FSMContext):
         await state.finish()
         await type_delete_menu(message)
     else:
-        await message.answer('Ничего подходящего по указанному...', reply_markup=keyboard)
+        await message.answer('Ничего подходящего по указанному адресу...', reply_markup=keyboard)
         await state.finish()
         await SelectMenu.waiting_sel_key_link.set()
 

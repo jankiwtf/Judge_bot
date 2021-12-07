@@ -8,10 +8,9 @@ from bot import SelectMenu
 # Connect to DB
 con = url_db.sql_connection()
 
-commands_admin = ['/add_user',
-                  '/show_users',
-                  '/delete_user',
-                  '/check_link'
+commands_admin = ['Добавить юзера',
+                  'Показать юзеров',
+                  'Удалить юзера'
                   ]
 
 
