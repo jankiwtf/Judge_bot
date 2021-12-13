@@ -10,8 +10,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-import utils, url_db, user_db
-import admin
+import utils, url_db, user_db, url_library, admin
 import ssl
 
 # Путь к файлу конфигурации
@@ -237,8 +236,6 @@ async def saved_key(message: types.Message, state: FSMContext):
     elif url_db.sql_check_link(url):
         await message.reply('За этим делом я уже слежу!')
     elif url[:4] == 'http':
-        # try:
-            import url_library
             if url_library.where_url_save(url) is not False:
                 await message.answer('Ожидай, добавляю дело в базу..')
                 parse_data = utils.data_parser(url)
@@ -262,8 +259,6 @@ async def saved_key(message: types.Message, state: FSMContext):
                     await message.answer('Не смог прочитать ссылку. \nПроверь правильность введенного адреса')
             else:
                 await message.answer('Ошибка в адресе или я c ним еще не умею работать. \nОбратись к администратору')
-        # except Exception:
-        #     await message.answer('Не смог прочитать ссылку. \nПроверь правильность введенного адреса')
     else:
         await message.reply('Упс, это была не ссылка..')
     await state.finish()

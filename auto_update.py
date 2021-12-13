@@ -28,12 +28,16 @@ def check_key(key):
         parse_data = utils.data_parser(link)
         if parse_data['success']:
             response = parse_data['response']
+            key = response[0]
             up_info = response[1]
             if up_info != db_info:
                 url_db.sql_update_info(up_info, link)
                 print('link is updated')
-                return {'bool': True, 'link': link, 'update': up_info, 'success': f"{parse_data['response'][0]}\n "
-                                                                                  f"{parse_data['response'][1]}\n "}
+                return {'bool': True,
+                        'link': link,
+                        'update': f"{key}\n{up_info}",
+                        'success': f"{parse_data['response'][0]}\n"
+                                   f"{parse_data['response'][1]}\n"}
             print('link is ok')
         else:
             return {'bool': False, 'link': link}
@@ -98,7 +102,7 @@ def func_auto_update():
                             f'Успешно проверенных: {count_keys - len(error_keys)} из ' \
                             f'{count_keys}\n'
         send_message(chat_id[0], info_message)
-        return
+    return
 
 
 # Отправка сообщений в чат
@@ -113,7 +117,7 @@ def send_message(chat_id, message):
     return bot.send_message(
         chat_id=chat_id, text=message, parse_mode=parse_mode, disable_notification=silent,
         disable_web_page_preview=disable_web_page_preview
-        )
+    )
 
 
 if __name__ == "__main__":
