@@ -1,4 +1,6 @@
+.gitignore
 /venv/
+.idea
 __pycache__
 .handler-saves
 botdatabase.db
