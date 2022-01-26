@@ -34,6 +34,10 @@ brown_site = [
     'https://krasnogorsk--mo.sudrf.ru',
     'https://ordzhonikidzevsky--svd.sudrf.ru',
     'https://berdsky--nsk.sudrf.ru',
+    'https://kgv--spb.sudrf.ru',
+    'https://sovetsky--orl.sudrf.ru',
+    'https://oblsud--jrs.sudrf.ru',
+    'https://centralnyr--hbr.sudrf.ru',
 ]
 
 brown_site_v2 = [
