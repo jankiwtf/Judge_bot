@@ -96,7 +96,7 @@ def func_auto_update():
         if len(success_keys) == 0:
             info_message += '\nНовой информации по делам нет'
         else:
-            info_message += f'\nОбновлено {len(success_keys)} дел.'
+            info_message += f'\nОбновлено {len(success_keys)} дел(-а).'
         if len(error_keys) != 0:
             info_message += '\nНе все дела смог проверить:\n' \
                             f'Успешно проверенных: {count_keys - len(error_keys)} из ' \
