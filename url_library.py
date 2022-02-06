@@ -38,6 +38,7 @@ brown_site = [
     'https://sovetsky--orl.sudrf.ru',
     'https://oblsud--jrs.sudrf.ru',
     'https://centralnyr--hbr.sudrf.ru',
+    'https://leninsky--bkr.sudrf.ru',
 ]
 
 brown_site_v2 = [
@@ -46,10 +47,6 @@ brown_site_v2 = [
     'https://2kas.sudrf.ru',
     'https://3kas.sudrf.ru',
 ]
-
-# brown_site_short = [
-#     'http://leninsky.bkr.sudrf.ru',
-# ]
 
 grey_site = [
     'https://mirsud.spb.ru',

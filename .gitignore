@@ -6,3 +6,4 @@ __pycache__
 botdatabase.db
 url_list.txt
 config.ini
+utils(old).py

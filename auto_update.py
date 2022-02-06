@@ -40,6 +40,7 @@ def check_key(key):
                                    f"{parse_data['response'][1]}\n"}
             print('link is ok')
         else:
+            print('no success',link)
             return {'bool': False, 'link': link}
     return {'bool': None}
 
@@ -85,11 +86,15 @@ def func_auto_update():
                             f"{success}"
             )
 
-        for error in error_keys:
-            send_message(
-                chat_id[0], f"{now}: Не обновилось дело:\n "
-                            f"{error}"
-            )
+        if len(error_keys) > 5:
+            error_message = "\n----------------\n".join(error_keys)
+            send_message(chat_id[0], error_message)
+        else:
+            for error in error_keys:
+                send_message(
+                    chat_id[0], f"{now}: Не обновилось дело:\n "
+                                f"{error}"
+                )
 
     for chat_id in chats:
         info_message = f'Ежедневный апдейт от {now} завершен:'
