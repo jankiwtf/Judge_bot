@@ -1,16 +1,30 @@
+import configparser
 import logging
+import os
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 import bot
-import url_db, user_db, url_library
+import telegram
+import url_db, user_db
 from bot import SelectMenu
+
+# Путь к файлу конфигурации
+thisfolder = os.path.dirname(os.path.abspath(__file__))
+configFilePath = os.path.join(thisfolder, 'config.ini')
+config = configparser.ConfigParser()
+config.read(configFilePath, encoding='utf-8')
+
+# Парсинг файла конфигурации
+token = config.get('telebot', 'token')
+
 # Connect to DB
 con = url_db.sql_connection()
 
 commands_admin = ['Добавить юзера',
                   'Показать юзеров',
-                  'Удалить юзера'
+                  'Удалить юзера',
+                  'Отправить сообщение'
                   ]
 
 
@@ -78,6 +92,7 @@ async def delete_user(message: types.Message):
     else:
         await message.answer('No saved users')
 
+
 async def select_user(message: types.Message, state: FSMContext):
     text = message.text
     ind = text.find(',', 1)
@@ -95,3 +110,23 @@ async def select_user(message: types.Message, state: FSMContext):
                 await state.finish()
     except Exception:
         await message.reply('Error! User is not removed')
+
+
+async def send_message_to_chat(message: types.Message, state: FSMContext):
+    timeout = 30
+    request = telegram.utils.request.Request(read_timeout=timeout)
+    telegram_bot = telegram.Bot(token, request=request)
+    parse_mode = None
+    silent = False
+    disable_web_page_preview = False
+
+    info_message = f"⚡️⚡️⚡️\n️Сообщение от администратора:\n{message.text}\n⚡️⚡️⚡️"
+    chats = url_db.sql_all_status()
+
+    for chat_id in chats:
+        telegram_bot.send_message(
+            chat_id=chat_id[0], text=info_message, parse_mode=parse_mode, disable_notification=silent,
+            disable_web_page_preview=disable_web_page_preview
+        )
+    await bot.admin_menu(message)
+    await state.finish()
