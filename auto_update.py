@@ -2,6 +2,8 @@
 
 import configparser
 import datetime
+import time
+import json
 import telegram
 import os
 import url_db
@@ -75,38 +77,63 @@ def func_auto_update():
 
     error_keys = news['errors']
     success_keys = news['success']
-    time = datetime.datetime.now()
-    now = time.strftime("%Y-%m-%d")
+    time_now = datetime.datetime.now()
+    now = time_now.strftime("%Y-%m-%d")
 
     # Рассылка результатов по подписавшимся на обновления чатам
     for chat_id in chats:
-        for success in success_keys:
-            send_message(
-                chat_id[0], f"Обновление дела от {now}:\n"
-                            f"{success}"
-            )
-
-        if len(error_keys) > 5:
-            error_message = "\n----------------\n".join(error_keys)
-            send_message(chat_id[0], error_message)
-        else:
-            for error in error_keys:
+        try:
+            for success in success_keys:
+                time.sleep(3)
                 send_message(
-                    chat_id[0], f"{now}: Не обновилось дело:\n "
-                                f"{error}"
+                    chat_id[0], f"Обновление дела от {now}:\n"
+                                f"{success}"
                 )
 
+            if len(error_keys) > 5:
+                with open(f'{thisfolder}/phrase.json') as json_file:
+                    phrases = json.load(json_file)
+                    index = phrases.get('index')
+                    if index == 25:
+                        index = 0
+                    phrase_of_day = phrases.get(str(index)).get('phrase')
+                    # phrases['index'] = index + 1
+
+                # with open(f'{thisfolder}/phrase.json', 'w') as outfile:
+                #     json.dump(phrases, outfile, ensure_ascii=False)
+
+                title_message = f"День не задался, но:\n{phrase_of_day}\nДела с ошибками({len(error_keys)}):\n"
+                error_message = "\n--------------------------------\n".join(error_keys)
+                message = title_message + error_message
+                send_message(chat_id[0], message)
+            else:
+                for error in error_keys:
+                    send_message(
+                        chat_id[0], f"{now}: Не обновилось дело:\n "
+                                    f"{error}"
+                    )
+        except:
+            continue
+
     for chat_id in chats:
-        info_message = f'Ежедневный апдейт от {now} завершен:'
-        if len(success_keys) == 0:
-            info_message += '\nНовой информации по делам нет'
-        else:
-            info_message += f'\nОбновлено {len(success_keys)} дел(-а).'
-        if len(error_keys) != 0:
-            info_message += '\nНе все дела смог проверить:\n' \
-                            f'Успешно проверенных: {count_keys - len(error_keys)} из ' \
-                            f'{count_keys}\n'
-        send_message(chat_id[0], info_message)
+        try:
+            info_message = f'Ежедневный апдейт от {now} завершен:'
+            if len(success_keys) == 0:
+                info_message += '\nНовой информации по делам нет'
+            else:
+                info_message += f'\nОбновлено {len(success_keys)} дел(-а).'
+            if len(error_keys) != 0:
+                info_message += '\nНе все дела смог проверить:\n' \
+                                f'Успешно проверенных: {count_keys - len(error_keys)} из ' \
+                                f'{count_keys}\n'
+            send_message(chat_id[0], info_message)
+        except:
+            continue
+
+    if len(error_keys) > 5:
+        phrases['index'] = index + 1
+        with open(f'{thisfolder}/phrase.json', 'w') as outfile:
+            json.dump(phrases, outfile, ensure_ascii=False)
     return
 
 
