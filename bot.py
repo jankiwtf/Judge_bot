@@ -73,6 +73,7 @@ class SelectMenu(StatesGroup):
     waiting_del_user = State()
     waiting_kind_link = State()
     waiting_check_link = State()
+    waiting_send_message = State()
 
 
 # Приветственное сообщение
@@ -171,8 +172,29 @@ async def delete_user(message: types.Message):
 
 
 @dp.message_handler(state=SelectMenu.waiting_del_user)
-async def select_link(message: types.Message, state: FSMContext):
+async def select_user(message: types.Message, state: FSMContext):
     await admin.select_user(message, state)
+
+
+# Адинистратор. Отправка сообщений в группы
+@dp.message_handler(Text(equals="отправить сообщение", ignore_case=True))
+async def send_message_to_chats(message: types.Message):
+    await clean_spam(message, 1)
+    # await admin.send_message_to_chat(message)
+    # await write_message(message)
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    cancel_but = types.KeyboardButton(text='Отмена')
+    keyboard.add(cancel_but)
+    await SelectMenu.waiting_send_message.set()
+    await message.answer('Напиши свое сообщение. Оно будет разослано по всем группам:', reply_markup=keyboard)
+
+
+@dp.message_handler(state=SelectMenu.waiting_send_message)
+async def write_message(message: types.Message, state: FSMContext):
+    if message.text.lower() == 'отмена' or message.text.lower() == 'cancel':
+        await state.finish()
+        await clean_spam(message, 2)
+    await admin.send_message_to_chat(message, state)
 
 
 # Пользователь. Просмотр всех дел
@@ -437,6 +459,7 @@ async def setup_menu(message: types.Message):
         await message.answer('Настройки:', reply_markup=keyboard)
 
 
+
 # Пользователь. Меню настроек. Включение авто-обновления
 @dp.message_handler(Text(equals="Авто-обновление ➔", ignore_case=True))
 async def on_update(message: types.Message):
@@ -477,13 +500,20 @@ async def clean_spam(message: types.Message, count_message):
     # user_message2_id = message.message_id - 2
     # message_id = message.message_id
     # count = count_message
+    # count_message = 3
+    # message_id = message.message_id - 1
+    # count_message = [message.message_id - i for i in range(count_message)]
+    # other_commands = ['Меню:', 'Настройки:', 'Отмена', 'cancel', 'Укажи ссылку на дело:', 'Выбери способ удаления:',
+    #                   ]
+    # commands_group = [commands_main, commands_delete, type_delete, other_commands]
+    # for each_id_mess in count_message:
+    #     for commands in commands_group:
+    #         if message.text in commands:
+    #             await bot.delete_message(message.chat.id, each_id_mess)
+    #     return
     count_delete_message = [message.message_id - i for i in range(count_message)]
     for one in count_delete_message:
         await bot.delete_message(message.chat.id, one)
-
-    # await bot.delete_message(message.chat.id, user_message2_id)
-    # await bot.delete_message(message.chat.id, user_message_id)
-    # await bot.delete_message(message.chat.id, bot_message_id)
 
 
 # Логика действий на команду Отмена
