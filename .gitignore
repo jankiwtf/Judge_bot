@@ -1,5 +1,8 @@
-/venv/
+venv/
 .handler-saves
-botdatabase.db
 url_list.txt
 config.ini
+(ignore)*
+botdatabase.db
+parse_work.py
+phrase.json
